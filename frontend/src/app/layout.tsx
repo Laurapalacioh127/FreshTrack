@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ProductsProvider } from "../contexts/ProductsContext";
+import { ClientsProvider } from "../contexts/ClientsContext";
+import { PaymentsProvider } from "../contexts/PaymentsContext";
 
 export const metadata: Metadata = {
   title: "FreshTrack | Alimentación inteligente",
@@ -14,7 +17,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body>
+        <ProductsProvider>
+          <ClientsProvider>
+            <PaymentsProvider>{children}</PaymentsProvider>
+          </ClientsProvider>
+        </ProductsProvider>
+      </body>
     </html>
   );
 }
