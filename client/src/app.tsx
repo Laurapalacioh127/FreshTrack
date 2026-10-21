@@ -1,63 +1,133 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+} from "react-router-dom";
+
 import { UserProvider, useUser } from "./providers/UserProvider";
-import { AxiosProvider } from "./providers/AxiosProvider";
-import { ToastProvider } from "./providers/ToastProvider";
-import { RoomsProvider } from "./providers/RoomsProvider";
-import { ChatProvider } from "./providers/ChatProvider";
-import { PrivateRoute } from "./components/PrivateRoute/PrivateRoute";
+import { FreshTrackProvider } from "./providers/FreshTrackProvider";
+import { ProtectedRoute } from "./components/ProtectedRoute/ProtectedRoute";
+
+import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
-import { RoomsPage } from "./pages/RoomsPage";
-import { ChatPage } from "./pages/ChatPage";
+import { DashboardPage } from "./pages/DashboardPage";
+import { InventoryPage } from "./pages/InventoryPage";
+import { ShoppingPage } from "./pages/ShoppingPage";
+import { RecipesPage } from "./pages/RecipesPage";
+import { DonationsPage } from "./pages/DonationsPage";
+import { ProfilePage } from "./pages/ProfilePage";
+import { AdminPage } from "./pages/AdminPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
 
-const AppRoutes = () => {
-  const { auth } = useUser();
+
+function AppRoutes() {
+  const { user } = useUser();
+
+  const homePath =
+    user?.role === "admin" ? "/admin" : "/dashboard";
 
   return (
     <Routes>
+      {/* Landing pública: no requiere iniciar sesión */}
+      <Route path="/" element={<LandingPage />} />
+
+      {/* Acceso y registro */}
       <Route
         path="/login"
-        element={auth ? <Navigate to="/rooms" /> : <LoginPage />}
+        element={
+          user ? <Navigate to={homePath} replace /> : <LoginPage />
+        }
       />
+
       <Route
         path="/register"
-        element={auth ? <Navigate to="/rooms" /> : <RegisterPage />}
-      />
-      <Route
-        path="/rooms"
         element={
-          <PrivateRoute isAuth={Boolean(auth)} redirectTo="/login">
-            <RoomsProvider>
-              <RoomsPage />
-            </RoomsProvider>
-          </PrivateRoute>
+          user ? <Navigate to={homePath} replace /> : <RegisterPage />
         }
       />
+
+      {/* Rutas para usuarios */}
       <Route
-        path="/rooms/:id"
+        path="/dashboard"
         element={
-          <PrivateRoute isAuth={Boolean(auth)} redirectTo="/login">
-            <ChatProvider>
-              <ChatPage />
-            </ChatProvider>
-          </PrivateRoute>
+          <ProtectedRoute role="user">
+            <DashboardPage />
+          </ProtectedRoute>
         }
       />
-      <Route path="*" element={<Navigate to={auth ? "/rooms" : "/login"} />} />
+
+      <Route
+        path="/inventory"
+        element={
+          <ProtectedRoute>
+            <InventoryPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/shopping"
+        element={
+          <ProtectedRoute role="user">
+            <ShoppingPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/recipes"
+        element={
+          <ProtectedRoute>
+            <RecipesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/donations"
+        element={
+          <ProtectedRoute>
+            <DonationsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute role="user">
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Panel de administrador */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute role="admin">
+            <AdminPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Página no encontrada */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
-};
+}
 
-export const App = () => {
+export function App() {
   return (
     <BrowserRouter>
-      <AxiosProvider>
-        <ToastProvider>
-          <UserProvider>
-            <AppRoutes />
-          </UserProvider>
-        </ToastProvider>
-      </AxiosProvider>
+      <UserProvider>
+        <FreshTrackProvider>
+          <AppRoutes />
+        </FreshTrackProvider>
+      </UserProvider>
     </BrowserRouter>
   );
-};
+}

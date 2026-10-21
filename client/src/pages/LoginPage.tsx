@@ -1,65 +1,57 @@
 import { useState } from "preact/hooks";
 import { Link } from "react-router-dom";
 import { useUser } from "../providers/UserProvider";
-import { AuthForm } from "../components/AuthForm/AuthForm";
-import { AuthInput } from "../components/AuthInput/AuthInput";
-import { SubmitButton } from "../components/SubmitButton/SubmitButton";
-import { Icon } from "../components/Icon/Icon";
 
-export const LoginPage = () => {
-  const { loading, login } = useUser();
-
+export function LoginPage() {
+  const { login } = useUser();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (e: Event) => {
-    e.preventDefault();
-    await login(email, password);
+  const submit = async (event: Event) => {
+    event.preventDefault();
+    setError("");
+    try {
+      await login(email, password);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No fue posible ingresar.");
+    }
   };
 
   return (
-    <AuthForm
-      icon={<Icon name="chat" />}
-      title="Bienvenido"
-      subtitle="Inicia sesion para continuar"
-      footer={
-        <>
-          No tienes cuenta?{" "}
-          <Link
-            to="/register"
-            class="font-medium no-underline"
-            style={{ color: "var(--color-primary)" }}
-          >
-            Crear cuenta
-          </Link>
-        </>
-      }
-    >
-      <form onSubmit={handleSubmit} class="flex flex-col gap-3">
-        <AuthInput
-          id="login-email"
-          label="Email"
-          type="email"
-          placeholder="tu@email.com"
-          value={email}
-          onInput={setEmail}
-          required
-        />
-        <AuthInput
-          id="login-password"
-          label="Contrasena"
-          type="password"
-          placeholder="••••••••"
-          value={password}
-          onInput={setPassword}
-          required
-        />
-        <SubmitButton
-          loading={loading}
-          loadingText="Entrando..."
-          text="Iniciar sesion"
-        />
-      </form>
-    </AuthForm>
+    <main className="auth-page">
+      <section className="auth-card">
+        <div className="auth-logo">F</div>
+        <p className="eyebrow">MENOS DESPERDICIO, MÁS BIENESTAR</p>
+        <h1>Bienvenido a FreshTrack</h1>
+        <p className="muted">Organiza tus alimentos y aprovecha cada ingrediente.</p>
+
+<div className="auth-brand">
+  <img
+    src="/FreshTraklogo.png"
+    alt="FreshTrack"
+    className="auth-logo"
+  />
+  <span>FreshTrack</span>
+</div>
+
+        <form onSubmit={submit} className="form-stack">
+          <label>Correo electrónico
+            <input type="email" value={email} onInput={(e) => setEmail(e.currentTarget.value)} placeholder="tu@correo.com" required />
+          </label>
+          <label>Contraseña
+            <input type="password" value={password} onInput={(e) => setPassword(e.currentTarget.value)} placeholder="Tu contraseña" required />
+          </label>
+          {error && <p className="error-message">{error}</p>}
+          <button className="primary-button" type="submit">Iniciar sesión</button>
+        </form>
+
+        <p className="auth-footer">¿No tienes cuenta? <Link to="/register">Regístrate</Link></p>
+        <p className="demo-note">Demo: cualquier correo y contraseña no vacíos.</p>
+        <div className="auth-back-home">
+        <Link to="/">← Volver a la página principal</Link>
+      </div>
+      </section>
+    </main>
   );
-};
+}
